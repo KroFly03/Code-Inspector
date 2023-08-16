@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+#  redis:
+#    image: redis
+#    restart: always
+#    ports:
+#      - "6379:6379"
+#
+#  celery:
+#    build: ./backend
+#    command: celery -A messenger worker -l info
+#    env_file:
+#      - ./backend/.env
+#    environment:
+#      - CELERY_BROKER_URL=redis://redis:6379/0
+#      - CELERY_RESULT_BACKEND=redis://redis:6379
+#      - POSTGRES_HOST=db
+#    depends_on:
+#      - redis
+#
+#  flower:
+#    image: mher/flower:0.9.7
+#    command: flower --broker=redis://redis:6379 --port=7777
+#    ports:
+#      - "7777:7777"
+#    depends_on:
+#      - redis
+#
+#  backend:
+#    build: ./backend
+#    env_file:
+#      - ./backend/.env
+#    environment:
+#      - POSTGRES_HOST=db
+#      - POSTGRES_PORT=5432
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      celery:
+#        condition: service_started
+#      migrations:
+#        condition: service_completed_successfully
+#
+#  migrations:
+#    build: ./backend
+#    env_file:
+#      - ./backend/.env
+#    environment:
+#      - POSTGRES_HOST=db
+#      - POSTGRES_PORT=5432
+#    depends_on:
+#      db:
+#        condition: service_started
+#    command: python manage.py migrate
+
+  db:
+    image: postgres:15.2
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./backend/.env
+    restart: always
