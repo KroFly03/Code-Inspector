@@ -1,8 +1,7 @@
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 
-from users.models import User, UploadedFile
+from users.models import User, UploadedFile, InspectorLog
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,6 +25,8 @@ class FileSerializer(serializers.ModelSerializer):
             raise ValidationError({'file': ['Данный файл уже удален.']})
 
         instance.status = UploadedFile.Status.UPDATED
+        instance.is_verified = False
+        instance.save()
         return super().update(instance, validated_data)
 
     def delete(self, instance: UploadedFile):
@@ -34,3 +35,9 @@ class FileSerializer(serializers.ModelSerializer):
 
         instance.status = UploadedFile.Status.DELETED
         instance.save()
+
+
+class FileInspectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InspectorLog
+        exclude = ('id', 'file')

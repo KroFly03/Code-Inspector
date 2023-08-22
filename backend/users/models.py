@@ -8,6 +8,7 @@ class User(AbstractUser):
     first_name = models.CharField(verbose_name='Имя', max_length=50)
     last_name = models.CharField(verbose_name='Фамилия', max_length=50)
     email = models.EmailField(verbose_name='Почта', unique=True)
+    is_active = models.BooleanField(verbose_name='Активный', default=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -30,11 +31,12 @@ class UploadedFile(models.Model):
         UPDATED = 'updated', 'Обновлен'
         DELETED = 'deleted', 'Удален'
 
-    file = models.FileField(verbose_name='Файл', upload_to='uploads/', validators=[FileExtensionValidator(['.py'])])
+    file = models.FileField(verbose_name='Файл', upload_to='uploads/', validators=[FileExtensionValidator(['py'])])
     uploaded_at = models.DateTimeField(verbose_name='Загружен', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='Обновлен', auto_now=True)
     user = models.ForeignKey(User, verbose_name='Пользователь', on_delete=models.CASCADE)
     status = models.CharField(verbose_name='Статус', choices=Status.choices, default=Status.NEW)
+    is_verified = models.BooleanField(verbose_name='Проверен', default=False)
 
     class Meta:
         verbose_name = 'Загруженный файл'
@@ -45,6 +47,7 @@ class UploadedFile(models.Model):
 
 
 class InspectorLog(models.Model):
-    text = models.TextField(verbose_name='Текст')
+    text = models.TextField(verbose_name='Текст', null=True)
     file = models.ForeignKey(UploadedFile, verbose_name='Файл', on_delete=models.CASCADE)
+    is_pep8_compliant = models.CharField(verbose_name='Соответствует стандартам')
     created_at = models.DateTimeField(verbose_name='Создан', auto_now_add=True)

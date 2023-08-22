@@ -1,10 +1,10 @@
-from rest_framework import generics, views, status
+from rest_framework import generics, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from users.models import User, UploadedFile
-from users.serializers import UserSerializer, FileSerializer
+from users.models import User, UploadedFile, InspectorLog
+from users.serializers import UserSerializer, FileSerializer, FileInspectorSerializer
 
 
 class UserCreateView(generics.CreateAPIView):
@@ -14,13 +14,12 @@ class UserCreateView(generics.CreateAPIView):
     authentication_classes = []
 
 
-class UserDetailView(views.APIView):
+class UserDetailView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        serializer = self.serializer_class(request.user)
-        return Response(serializer.data)
+    def get_object(self):
+        return self.request.user
 
 
 class BaseFileView(GenericAPIView):
@@ -35,7 +34,7 @@ class FileView(generics.ListCreateAPIView, BaseFileView):
     pass
 
 
-class FileDetailVIew(generics.RetrieveUpdateDestroyAPIView, BaseFileView):
+class FileDetailView(generics.RetrieveUpdateDestroyAPIView, BaseFileView):
     http_method_names = ['get', 'put', 'delete']
 
     def perform_destroy(self, request, *args, **kwargs):
@@ -45,3 +44,12 @@ class FileDetailVIew(generics.RetrieveUpdateDestroyAPIView, BaseFileView):
         serializer.delete(instance)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FileInspectorView(generics.ListAPIView):
+    serializer_class = FileInspectorSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        file_id = self.kwargs.get('pk')
+        return InspectorLog.objects.filter(file__user=self.request.user, file_id=file_id).order_by('-created_at')
